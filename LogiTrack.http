@@ -1,6 +1,30 @@
 @LogiTrack_HostAddress = http://localhost:5087
 
-GET {{LogiTrack_HostAddress}}/weatherforecast/
+GET {{LogiTrack_HostAddress}}/api/order
 Accept: application/json
+###
 
+GET {{LogiTrack_HostAddress}}/api/order/2
+Accept: application/json
+###
+
+POST {{LogiTrack_HostAddress}}/api/order
+Accept: application/json
+Content-Type: application/json
+
+{
+  "customerName": "Ena",
+  "datePlaced": "2023-10-01T12:00:00Z",
+  "items": [
+    {
+      "name": "MUFC Membership",
+      "quantity": 1,
+      "location": "Bruchsal"
+    }
+  ]
+}
+###
+
+DELETE {{LogiTrack_HostAddress}}/api/order/2
+Accept: application/json
 ###

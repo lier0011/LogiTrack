@@ -1,6 +1,43 @@
 using LogiTrack;
 using LogiTrack.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Register DbContext for dependency injection
+builder.Services.AddDbContext<LogiTrackContext>();
+// Register controllers with JSON options to ignore cycles
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+// Register Swagger generator for Swashbuckle
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Map controller endpoints
+app.MapControllers();
+
+app.Run();
+
+/*
+// I commented out the code below to avoid confusion, as it is not part of the main program flow.
+
+using LogiTrack;
+using LogiTrack.Models;
+using Microsoft.EntityFrameworkCore;
 
 class Program
 {
@@ -68,4 +105,4 @@ class Program
             }
         }
     }
-}
+}*/

@@ -32,16 +32,39 @@ class Program
                 });
 
                 context.Orders.Add(order);
+
+                var order2 = new Order
+                {
+                    CustomerName = "ManUtd Ltd",
+                    DatePlaced = DateTime.Now
+                };
+
+                // Add an inventory item to the order
+                order2.AddItem(new InventoryItem
+                {
+                    Name = "Boots",
+                    Quantity = 50,
+                    Location = "Warehouse Salford"
+                });
+                order2.AddItem(new InventoryItem
+                {
+                    Name = "Training Kit",
+                    Quantity = 100,
+                    Location = "Warehouse Eccles"
+                });
+
+                context.Orders.Add(order2);
                 context.SaveChanges();
             }
 
             // Retrieve and display the order
             var existingOrder = context.Orders
                 .Include(o => o.Items) // Include related items
-                .FirstOrDefault();
-            if (existingOrder != null)
+                .ToList();
+            Console.WriteLine(existingOrder.Count() + " orders found.");
+            foreach (var order in existingOrder)
             {
-                existingOrder.GetOrderSummary();
+                order.GetOrderSummary();
             }
         }
     }

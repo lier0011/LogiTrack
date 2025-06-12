@@ -1,8 +1,12 @@
 namespace LogiTrack.Models;
+using System.ComponentModel.DataAnnotations;
 public class Order
 {
+    [Key]
     required public int OrderId { get; set; }
+    [Required]
     required public string CustomerName { get; set; }
+    [Required]
     required public DateTime DatePlaced { get; set; }
     public List<InventoryItem>? Items { get; set; }
     public void AddItem(InventoryItem item)

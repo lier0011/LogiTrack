@@ -1,5 +1,6 @@
 using LogiTrack;
 using LogiTrack.Models;
+using Microsoft.EntityFrameworkCore;
 
 class Program
 {
@@ -7,24 +8,40 @@ class Program
     {
         using (var context = new LogiTrackContext())
         {
-            // Add test inventory item if none exist
-            if (!context.InventoryItems.Any())
+            // Add order if none exist
+            if (!context.Orders.Any())
             {
-                context.InventoryItems.Add(new InventoryItem
+                var order = new Order
+                {
+                    CustomerName = "Acme Corp",
+                    DatePlaced = DateTime.Now
+                };
+
+                // Add an inventory item to the order
+                order.AddItem(new InventoryItem
+                {
+                    Name = "Forklift",
+                    Quantity = 5,
+                    Location = "Warehouse B"
+                });
+                order.AddItem(new InventoryItem
                 {
                     Name = "Pallet Jack",
                     Quantity = 12,
                     Location = "Warehouse A"
                 });
 
+                context.Orders.Add(order);
                 context.SaveChanges();
             }
 
-            // Retrieve and print inventory to confirm
-            var items = context.InventoryItems.ToList();
-            foreach (var item in items)
+            // Retrieve and display the order
+            var existingOrder = context.Orders
+                .Include(o => o.Items) // Include related items
+                .FirstOrDefault();
+            if (existingOrder != null)
             {
-                item.DisplayInfo(); // Should print: Item: Pallet Jack | Quantity: 12 | Location: Warehouse A
+                existingOrder.GetOrderSummary();
             }
         }
     }

@@ -1,24 +1,31 @@
+using LogiTrack;
 using LogiTrack.Models;
 
-Order order = new Order
+class Program
 {
-    OrderId = 123,
-    CustomerName = "John Doe",
-    DatePlaced = DateTime.Now
-};
+    static void Main(string[] args)
+    {
+        using (var context = new LogiTrackContext())
+        {
+            // Add test inventory item if none exist
+            if (!context.InventoryItems.Any())
+            {
+                context.InventoryItems.Add(new InventoryItem
+                {
+                    Name = "Pallet Jack",
+                    Quantity = 12,
+                    Location = "Warehouse A"
+                });
 
-order.AddItem(new InventoryItem
-{
-    ItemId = 1,
-    Name = "Smartphone",
-    Quantity = 10,
-    Location = "Manchester"
-});
-order.AddItem(new InventoryItem
-{
-    ItemId = 2,
-    Name = "Monitor",
-    Quantity = 5,
-    Location = "Tasikmalaya"
-});
-order.GetOrderSummary();
+                context.SaveChanges();
+            }
+
+            // Retrieve and print inventory to confirm
+            var items = context.InventoryItems.ToList();
+            foreach (var item in items)
+            {
+                item.DisplayInfo(); // Should print: Item: Pallet Jack | Quantity: 12 | Location: Warehouse A
+            }
+        }
+    }
+}

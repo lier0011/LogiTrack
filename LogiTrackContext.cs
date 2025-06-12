@@ -1,3 +1,5 @@
+namespace LogiTrack;
+
 using Microsoft.EntityFrameworkCore;
 using LogiTrack.Models;
 public class LogiTrackContext : DbContext

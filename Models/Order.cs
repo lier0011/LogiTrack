@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 public class Order
 {
     [Key]
-    required public int OrderId { get; set; }
+    public int OrderId { get; set; }
     [Required]
     required public string CustomerName { get; set; }
     [Required]

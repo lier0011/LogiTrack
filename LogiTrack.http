@@ -28,3 +28,18 @@ Content-Type: application/json
 DELETE {{LogiTrack_HostAddress}}/api/order/2
 Accept: application/json
 ###
+
+GET {{LogiTrack_HostAddress}}/api/inventory
+Accept: application/json
+###
+
+POST {{LogiTrack_HostAddress}}/api/inventory
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Smartphone",
+  "quantity": 10,
+  "location": "Bandung"
+}
+###

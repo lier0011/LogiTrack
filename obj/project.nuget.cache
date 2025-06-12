@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "Tuhk9ejuBWA=",
+  "success": true,
+  "projectFilePath": "/home/cemox/coursera/dotnet/net9/LogiTrack/LogiTrack.csproj",
+  "expectedPackageFiles": [
+    "/home/cemox/.nuget/packages/microsoft.aspnetcore.openapi/9.0.3/microsoft.aspnetcore.openapi.9.0.3.nupkg.sha512",
+    "/home/cemox/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -7,22 +7,19 @@ public class Order
     [Required]
     required public string CustomerName { get; set; }
     [Required]
-    required public DateTime DatePlaced { get; set; }
-    public List<InventoryItem>? Items { get; set; }
+    required public DateTime DatePlaced { get; set; } = DateTime.Now;
+    public List<InventoryItem> Items { get; set; }
+    public Order()
+    {
+        Items = new List<InventoryItem>();
+    }
     public void AddItem(InventoryItem item)
     {
-        if (Items == null)
-        {
-            Items = new List<InventoryItem>();
-        }
         Items.Add(item);
     }
     public void RemoveItem(int itemId)
     {
-        if (Items != null)
-        {
-            Items.RemoveAll(item => item.ItemId == itemId);
-        }
+        Items.RemoveAll(item => item.ItemId == itemId);
     }
     public void GetOrderSummary()
     {

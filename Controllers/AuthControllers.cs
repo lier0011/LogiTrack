@@ -34,6 +34,7 @@ public class AuthController : ControllerBase
         public string Password { get; set; } = string.Empty;
         [Required]
         public string Name { get; set; } = string.Empty;
+        public string Role { get; set; } = "User";
     }
 
     [HttpPost("register")]
@@ -50,9 +51,14 @@ public class AuthController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
         var result = await _userManager.CreateAsync(user, model.Password);
-        if (result.Succeeded)
-            return Ok(new { message = "Registration successful" });
-        return BadRequest(result.Errors);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        // Assign role if provided and valid, otherwise default to "User"
+        var role = (model.Role == "Admin" || model.Role == "User") ? model.Role : "User";
+        await _userManager.AddToRoleAsync(user, role);
+
+        return Ok(new { message = $"Registration successful. Role: {role}" });
     }
 
     public class LoginModel
@@ -77,15 +83,17 @@ public class AuthController : ControllerBase
         if (!result.Succeeded)
             return Unauthorized(new { message = "Invalid credentials" });
 
-        // Generate JWT
-        var claims = new[]
+        // Get user roles and add them as claims
+        var roles = await _userManager.GetRolesAsync(user);
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("name", user.Name ?? string.Empty)
         };
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "ELSecretKey20250613"));
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],

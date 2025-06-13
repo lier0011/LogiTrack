@@ -17,16 +17,17 @@ public class OrderController : ControllerBase
 
     // GET: /api/order
     [HttpGet]
-    public ActionResult<IEnumerable<Order>> GetAll()
+    public async Task<ActionResult<IEnumerable<Order>>> GetAll()
     {
-        return Ok(_context.Orders.Include(o => o.Items).ToList());
+        var orders = await _context.Orders.Include(o => o.Items).ToListAsync();
+        return Ok(orders);
     }
 
     // GET: /api/order/{id}
     [HttpGet("{id}")]
-    public ActionResult<Order> GetOrderById(int id)
+    public async Task<ActionResult<Order>> GetOrderById(int id)
     {
-        var order = _context.Orders.Include(o => o.Items).FirstOrDefault(o => o.OrderId == id);
+        var order = await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.OrderId == id);
         if (order == null)
             return NotFound(new { message = $"Not a valid order" });
         return Ok(order);
@@ -34,22 +35,22 @@ public class OrderController : ControllerBase
 
     // POST: /api/order
     [HttpPost]
-    public ActionResult<Order> AddOrder([FromBody] Order order)
+    public async Task<ActionResult<Order>> AddOrder([FromBody] Order order)
     {
-        _context.Orders.Add(order);
-        _context.SaveChanges();
+        await _context.Orders.AddAsync(order);
+        await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetAll), new { id = order.OrderId }, order);
     }
 
     // DELETE: /api/order/{id}
     [HttpDelete("{id}")]
-    public IActionResult DeleteOrder(int id)
+    public async Task<IActionResult> DeleteOrder(int id)
     {
-        var order = _context.Orders.Find(id);
+        var order = await _context.Orders.FindAsync(id);
         if (order == null)
             return NotFound(new { message = $"Not a valid order" });
         _context.Orders.Remove(order);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
         return NoContent();
     }
 }

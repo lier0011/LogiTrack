@@ -16,19 +16,20 @@ public class InventoryController : ControllerBase
 
     // GET: /api/inventory
     [HttpGet]
-    public ActionResult<IEnumerable<InventoryItem>> GetAll()
+    public async Task<ActionResult<IEnumerable<InventoryItem>>> GetAll()
     {
-        return Ok(_context.InventoryItems.ToList());
+        var items = await _context.InventoryItems.ToListAsync();
+        return Ok(items);
     }
 
     // POST: /api/inventory
     [HttpPost]
-    public ActionResult<InventoryItem> AddItem([FromBody] InventoryItem item)
+    public async Task<ActionResult<InventoryItem>> AddItem([FromBody] InventoryItem item)
     {
         try
         {
-            _context.InventoryItems.Add(item);
-            _context.SaveChanges();
+            await _context.InventoryItems.AddAsync(item);
+            await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetAll), new { id = item.ItemId }, item);
         }
         catch (Exception ex)
@@ -39,13 +40,13 @@ public class InventoryController : ControllerBase
 
     // DELETE: /api/inventory/{id}
     [HttpDelete("{id}")]
-    public IActionResult DeleteItem(int id)
+    public async Task<IActionResult> DeleteItem(int id)
     {
-        var item = _context.InventoryItems.Find(id);
+        var item = await _context.InventoryItems.FindAsync(id);
         if (item == null)
             return NotFound(new { message = $"Not a valid inventory item" });
         _context.InventoryItems.Remove(item);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
         return NoContent();
     }
 }

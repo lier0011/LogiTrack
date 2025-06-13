@@ -14,3 +14,7 @@ create initial app:
 ## Part 3
 * authorization using ASP.NET Identity
 * also role-based access on specific endpoints
+
+## Part 4
+* logging middleware
+* in-cache memory for Order + Inventory endpoints

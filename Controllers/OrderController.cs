@@ -1,10 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
+namespace LogiTrack.Controllers;
+
 using LogiTrack.Models;
-using LogiTrack;
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-
-namespace LogiTrack.Controllers;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -12,16 +14,33 @@ namespace LogiTrack.Controllers;
 public class OrderController : ControllerBase
 {
     private readonly LogiTrackContext _context;
-    public OrderController(LogiTrackContext context)
+    private readonly IMemoryCache _cache;
+    private readonly ILogger<OrderController> _logger;
+    private const string cacheKey = "order_items";
+    public OrderController(LogiTrackContext context, IMemoryCache cache, ILogger<OrderController> logger)
     {
+        _cache = cache;
         _context = context;
+        _logger = logger;
     }
 
     // GET: /api/order
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Order>>> GetAll()
     {
-        var orders = await _context.Orders.Include(o => o.Items).ToListAsync();
+        if (!_cache.TryGetValue(cacheKey, out List<Order>? orders))
+        {
+            orders = await _context.Orders.AsNoTracking().ToListAsync();
+            var cacheEntryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
+            };
+            _cache.Set(cacheKey, orders, cacheEntryOptions);
+        }
+        else
+        {
+            _logger.LogInformation("[{dateTime}] Cache hit for order items", DateTime.UtcNow);
+        }
         return Ok(orders);
     }
 
@@ -29,9 +48,11 @@ public class OrderController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Order>> GetOrderById(int id)
     {
-        var order = await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.OrderId == id);
-        if (order == null)
+        // Suggestion 5: Use AnyAsync for existence check before fetching
+        bool exists = await _context.Orders.AsNoTracking().AnyAsync(o => o.OrderId == id);
+        if (!exists)
             return NotFound(new { message = $"Not a valid order" });
+        var order = await _context.Orders.Include(o => o.Items).AsNoTracking().FirstOrDefaultAsync(o => o.OrderId == id);
         return Ok(order);
     }
 
@@ -41,6 +62,7 @@ public class OrderController : ControllerBase
     {
         await _context.Orders.AddAsync(order);
         await _context.SaveChangesAsync();
+        _cache.Remove(cacheKey);
         return CreatedAtAction(nameof(GetAll), new { id = order.OrderId }, order);
     }
 
@@ -48,11 +70,14 @@ public class OrderController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteOrder(int id)
     {
+        // Suggestion 5: Use AnyAsync for existence check before fetching
         var order = await _context.Orders.FindAsync(id);
         if (order == null)
             return NotFound(new { message = $"Not a valid order" });
         _context.Orders.Remove(order);
         await _context.SaveChangesAsync();
+        // Suggestion 4: Remove cache after data change
+        _cache.Remove(cacheKey);
         return NoContent();
     }
 }

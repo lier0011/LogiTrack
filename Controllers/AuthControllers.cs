@@ -1,15 +1,12 @@
+namespace LogiTrack.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using LogiTrack.Models;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
-namespace LogiTrack.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,12 +15,14 @@ public class AuthController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+    public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, ILogger<AuthController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
+        _logger = logger;
     }
 
     public class RegisterModel
@@ -42,6 +41,9 @@ public class AuthController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+
+        // Log registration attempt
+        _logger.LogInformation("[{dateTime}] Register endpoint triggered by: {email}", DateTime.UtcNow, model.Email);
 
         var user = new ApplicationUser
         {
@@ -74,6 +76,9 @@ public class AuthController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+
+        // Log login attempt
+        _logger.LogInformation("[{dateTime}] Login endpoint triggered by: {email}", DateTime.UtcNow, model.Email);
 
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)

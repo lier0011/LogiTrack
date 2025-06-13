@@ -60,24 +60,38 @@ public class OrderController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Order>> AddOrder([FromBody] Order order)
     {
-        await _context.Orders.AddAsync(order);
-        await _context.SaveChangesAsync();
-        _cache.Remove(cacheKey);
-        return CreatedAtAction(nameof(GetAll), new { id = order.OrderId }, order);
+        try
+        {
+            await _context.Orders.AddAsync(order);
+            await _context.SaveChangesAsync();
+            InvalidateCache();
+            return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, order);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing AddOrder request for order: {order}", order);
+            return BadRequest(new { message = $"Error processing request: {ex.Message}" });
+        }
     }
 
     // DELETE: /api/order/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteOrder(int id)
     {
-        // Suggestion 5: Use AnyAsync for existence check before fetching
-        var order = await _context.Orders.FindAsync(id);
-        if (order == null)
+        bool exists = await _context.Orders.AsNoTracking().AnyAsync(o => o.OrderId == id);
+        if (!exists)
             return NotFound(new { message = $"Not a valid order" });
+        var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == id);
+        if (order == null)
+            return NotFound(new { message = $"Order was deleted before operation" });
         _context.Orders.Remove(order);
         await _context.SaveChangesAsync();
-        // Suggestion 4: Remove cache after data change
-        _cache.Remove(cacheKey);
+        InvalidateCache();
         return NoContent();
+    }
+
+    private void InvalidateCache()
+    {
+        _cache.Remove(cacheKey);
     }
 }

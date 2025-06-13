@@ -2,6 +2,7 @@ namespace LogiTrack;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using LogiTrack.Models;
 public class LogiTrackContext : IdentityDbContext<ApplicationUser>
 {
@@ -66,6 +67,25 @@ public class LogiTrackContext : IdentityDbContext<ApplicationUser>
             });
             Orders.Add(order2);
             SaveChanges();
+        }
+    }
+
+    public async Task SeedRolesAndUsersAsync(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+    {
+        string[] roles = new[] { "Admin", "User" };
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        // Assign the user to the Admin role (change email/role as needed)
+        var user = await userManager.FindByEmailAsync("test@example.com");
+        if (user != null && !await userManager.IsInRoleAsync(user, "Admin"))
+        {
+            await userManager.AddToRoleAsync(user, "Admin");
         }
     }
 }

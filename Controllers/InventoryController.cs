@@ -35,8 +35,15 @@ public class InventoryController : ControllerBase
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
             };
             _cache.Set(cacheKey, items, cacheEntryOptions);
+        } else {
+            _logger.LogInformation("[{dateTime}] Cache hit for inventory items", DateTime.UtcNow);
         }
         return Ok(items);
+    }
+
+    private void InvalidateCache()
+    {
+        _cache.Remove(cacheKey);
     }
 
     // POST: /api/inventory
@@ -47,12 +54,12 @@ public class InventoryController : ControllerBase
         {
             await _context.InventoryItems.AddAsync(item);
             await _context.SaveChangesAsync();
-            // Suggestion 4: Remove cache after data change
-            _cache.Remove(cacheKey);
-            return CreatedAtAction(nameof(GetAll), new { id = item.ItemId }, item);
+            InvalidateCache();
+            return CreatedAtAction(nameof(GetItemById), new { id = item.ItemId }, item);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error processing AddItem request for inventory item: {item}", item);
             return BadRequest(new { message = $"Error processing request: {ex.Message}" });
         }
     }
@@ -61,13 +68,25 @@ public class InventoryController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteItem(int id)
     {
-        var item = await _context.InventoryItems.FindAsync(id);
-        if (item == null)
+        bool exists = await _context.InventoryItems.AsNoTracking().AnyAsync(i => i.ItemId == id);
+        if (!exists)
             return NotFound(new { message = $"Not a valid inventory item" });
+        var item = await _context.InventoryItems.FirstOrDefaultAsync(i => i.ItemId == id);
+        if (item == null)
+            return NotFound(new { message = $"Inventory item was deleted before operation" });
         _context.InventoryItems.Remove(item);
         await _context.SaveChangesAsync();
-        // Suggestion 4: Remove cache after data change
-        _cache.Remove(cacheKey);
+        InvalidateCache();
         return NoContent();
+    }
+
+    // GET: /api/inventory/{id}
+    [HttpGet("{id}")]
+    public async Task<ActionResult<InventoryItem>> GetItemById(int id)
+    {
+        var item = await _context.InventoryItems.AsNoTracking().FirstOrDefaultAsync(i => i.ItemId == id);
+        if (item == null)
+            return NotFound(new { message = $"Not a valid inventory item" });
+        return Ok(item);
     }
 }

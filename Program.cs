@@ -8,6 +8,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// caching
+builder.Services.AddMemoryCache();
 // Register DbContext for dependency injection
 builder.Services.AddDbContext<LogiTrackContext>();
 // Register Identity services for user management

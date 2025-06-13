@@ -43,6 +43,9 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        // Log registration attempt
+        Console.WriteLine($"[{DateTime.UtcNow}] Register endpoint triggered by: {model.Email}");
+
         var user = new ApplicationUser
         {
             UserName = model.Email,
@@ -74,6 +77,9 @@ public class AuthController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+
+        // Log login attempt
+        Console.WriteLine($"[{DateTime.UtcNow}] Login endpoint triggered by: {model.Email}");
 
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)

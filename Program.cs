@@ -73,6 +73,9 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Add request logging middleware before authentication/authorization
+app.UseMiddleware<LogiTrack.LoggingMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

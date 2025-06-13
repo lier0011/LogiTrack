@@ -21,4 +21,49 @@ public class LogiTrackContext : DbContext
             .WithOne(i => i.Order)
             .HasForeignKey(i => i.OrderId);
     }
+
+    public void SeedSampleData()
+    {
+        if (!Orders.Any())
+        {
+            var order = new Order
+            {
+                CustomerName = "Acme Corp",
+                DatePlaced = DateTime.Now
+            };
+            order.AddItem(new InventoryItem
+            {
+                Name = "Forklift",
+                Quantity = 5,
+                Location = "Warehouse B"
+            });
+            order.AddItem(new InventoryItem
+            {
+                Name = "Pallet Jack",
+                Quantity = 12,
+                Location = "Warehouse A"
+            });
+            Orders.Add(order);
+
+            var order2 = new Order
+            {
+                CustomerName = "ManUtd Ltd",
+                DatePlaced = DateTime.Now
+            };
+            order2.AddItem(new InventoryItem
+            {
+                Name = "Boots",
+                Quantity = 50,
+                Location = "Warehouse Salford"
+            });
+            order2.AddItem(new InventoryItem
+            {
+                Name = "Training Kit",
+                Quantity = 100,
+                Location = "Warehouse Eccles"
+            });
+            Orders.Add(order2);
+            SaveChanges();
+        }
+    }
 }

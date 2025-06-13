@@ -18,3 +18,25 @@ create initial app:
 ## Part 4
 * logging middleware
 * in-cache memory for Order + Inventory endpoints
+
+## Part 5
+* final review using Copilot
+* centralised seeding user + role
+* eliminated redundancy basecode in user + inventory controllers
+
+# API Endpoints
+
+## Auth
+* POST /api/Auth/register, register a user
+* POST /api/Auth/login, login in order to get the access token
+
+## Inventory (admin only)
+* GET /api/Inventory, get all inventory items
+* POST /api/Inventory, submit an inventory item
+* DELETE /api/Inventory/<id>, remove inventory item by Id
+
+## Order
+* GET /api/Order, get all orders
+* POST /api/Order, submit a new order
+* GET /api/Order/<id>, get a specific order by Id
+* DELETE /api/Order/<id>, delete a specific order by Id

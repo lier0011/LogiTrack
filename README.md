@@ -10,3 +10,7 @@ create initial app:
 ## Part 2
 * API controllers for Order and Inventory
 * async method for all endpoints
+
+## Part 3
+* authorization using ASP.NET Identity
+* also role-based access on specific endpoints

@@ -3,9 +3,11 @@ namespace LogiTrack.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using LogiTrack.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class InventoryController : ControllerBase
 {
     private readonly LogiTrackContext _context;

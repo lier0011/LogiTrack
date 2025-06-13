@@ -1,16 +1,23 @@
 @LogiTrack_HostAddress = http://localhost:5087
-
-GET {{LogiTrack_HostAddress}}/api/order
-Accept: application/json
+@Token = ENTER_YOUR_TOKEN_HERE
+}
+GET {{LogiTrack_HostAddress}}
 ###
 
-GET {{LogiTrack_HostAddress}}/api/order/13
+GET {{LogiTrack_HostAddress}}/api/Order
 Accept: application/json
+Authorization: Bearer {{Token}}
 ###
 
-POST {{LogiTrack_HostAddress}}/api/order
+GET {{LogiTrack_HostAddress}}/api/Order/1
+Accept: application/json
+Authorization: Bearer {{Token}}
+###
+
+POST {{LogiTrack_HostAddress}}/api/Order
 Accept: application/json
 Content-Type: application/json
+Authorization: Bearer {{Token}}
 
 {
   "customerName": "Ena",
@@ -25,26 +32,51 @@ Content-Type: application/json
 }
 ###
 
-DELETE {{LogiTrack_HostAddress}}/api/order/120
+DELETE {{LogiTrack_HostAddress}}/api/Order/120
 Accept: application/json
+Authorization: Bearer {{Token}}
 ###
 
-GET {{LogiTrack_HostAddress}}/api/inventory
+GET {{LogiTrack_HostAddress}}/api/Inventory
 Accept: application/json
+Authorization: Bearer {{Token}}
 ###
 
-POST {{LogiTrack_HostAddress}}/api/inventory
+POST {{LogiTrack_HostAddress}}/api/Inventory
 Accept: application/json
 Content-Type: application/json
+Authorization: Bearer {{Token}}
 
 {
   "name": "Smartphone",
   "quantity": 10,
   "location": "Bandung",
-  "orderId": 130
+  "orderId": 5
 }
 ###
 
-DELETE {{LogiTrack_HostAddress}}/api/inventory/600
+DELETE {{LogiTrack_HostAddress}}/api/Inventory/600
 Accept: application/json
+Authorization: Bearer {{Token}}
+###
+
+POST {{LogiTrack_HostAddress}}/api/auth/register
+Accept: application/json
+Content-Type: application/json
+
+{
+  "Email": "test@example.com",
+  "Password": "Password123!",
+  "Name": "Erwin"
+}
+###
+
+POST {{LogiTrack_HostAddress}}/api/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "Email": "test@example.com",
+  "Password": "Password123!"
+}
 ###

@@ -1,8 +1,9 @@
 namespace LogiTrack;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using LogiTrack.Models;
-public class LogiTrackContext : DbContext
+public class LogiTrackContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<InventoryItem> InventoryItems { get; set; }
     public DbSet<Order> Orders { get; set; }
@@ -10,6 +11,7 @@ public class LogiTrackContext : DbContext
         => options.UseSqlite("Data Source=logitrack.db");
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder); // Required for Identity tables
         modelBuilder.Entity<InventoryItem>()
             .HasOne(i => i.Order)
             .WithMany(o => o.Items)
